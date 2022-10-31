@@ -4,7 +4,6 @@ import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import FormControlLabel from "@mui/material/FormControlLabel";
-
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
@@ -12,54 +11,33 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useState } from "react";
-import { auth, createUserWithEmailAndPassword } from "./firebase";
-import { Link } from "react-router-dom";
+import {
+  auth,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged
+} from "./firebase";
+import { useNavigate, Link } from "react-router-dom";
+import { useEffect } from "react";
+import { UserAuth } from "./authContext";
+
 const theme = createTheme();
 
 export default function SignUp() {
-  //   const handleSubmit = (event) => {
-  //     event.preventDefault();
-  //     const data = new FormData(event.currentTarget);
-  //     console.log({
-  //       email: data.get('email'),
-  //       password: data.get('password'),
-  //     });
-  //   };
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const SignUpData = async () => {
-   await createUserWithEmailAndPassword(
-      auth,
-      registrationData.email,
-      registrationData.password
-    )
-      .then((userCredential) => {
-        const user = userCredential.user;
-        
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // ..
-      });
+  const { createUser } = UserAuth();
+
+  const SignUpData = async (e) => {
+    e.preventDefault();
+    try {
+      await createUser(email, password);
+      navigate("/");
+    } catch (e) {
+      console.log(e.message);
+    }
   };
-
-  const [registrationData, setRegistrationData] = useState({
-    email: "",
-    password: ""
-  });
-
-  const Registration = (e) => {
-    setRegistrationData({
-      ...registrationData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  //     const Register = (e) => {
-  //         e.preventDefault()
-  //       console.log(registrationData.email);
-
-  //   };
 
   return (
     <ThemeProvider theme={theme}>
@@ -110,7 +88,7 @@ export default function SignUp() {
                   label="Email Address"
                   name="email"
                   autoComplete="email"
-                  onChange={Registration}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -122,7 +100,7 @@ export default function SignUp() {
                   type="password"
                   id="password"
                   autoComplete="new-password"
-                  onChange={Registration}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </Grid>
               {/* <Grid item xs={12}>
@@ -142,9 +120,9 @@ export default function SignUp() {
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-              Already have an account?
+                Already have an account?
                 <Link to="/signIn" variant="body2">
-                   Sign in
+                  Sign in
                 </Link>
               </Grid>
             </Grid>
